@@ -49,7 +49,7 @@ class RefreshBankLoginController extends AbstractActionController
     protected function processIntuitRequest( $data ) {
 
     	  $this->intuitInterface = new IntuitInterface( );
-    		$intuitResult = $this->intuitInterface->	public function updateInstitutionLogin( $data->customerId,
+    		$intuitResult = $this->intuitInterface->updateInstitutionLogin( $data->customerId,
 											$data->loginId, 
 											true, 
 											$data->loginParameters );
