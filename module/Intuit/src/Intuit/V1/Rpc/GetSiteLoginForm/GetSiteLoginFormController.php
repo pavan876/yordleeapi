@@ -15,7 +15,7 @@ class GetSiteLoginFormController extends AbstractActionController
             $data = json_decode($data);
 
     		$intuit = new IntuitInterface( );
-    		$site_details = $intuit->getInstitutionDetails( $data->customer_id, $data->bank_id );
+    		$site_details = $intuit->getInstitutionDetails( 'privpass', $data->bankId );
 
     		if( $site_details->result == 'success' ) {
 	    		$result = new \stdClass;

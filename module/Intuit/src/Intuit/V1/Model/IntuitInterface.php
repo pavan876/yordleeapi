@@ -57,8 +57,8 @@ class IntuitInterface {
 													 
 		$action = 'POST';
 		$url = 'v1/institutions/' . $institutionId . '/logins';
-		$headerAttribs = array ( 'challengeNodeId' => $challengeNodeId,
-								 'challengeSessionId' => $challengeSessionId
+		$headerAttribs = array ( 'challengeNodeId: ' .  $challengeNodeId,
+								 'challengeSessionId: ' .  $challengeSessionId
 		);
 
 		$postData['challengeResponses'] = new \stdClass;
@@ -159,15 +159,26 @@ class IntuitInterface {
 		$url = 'v1/logins/' . $loginId . '/?refresh=' . (($isRefreshReqd)?('true'):('false'));
 		
 		$this->initializeSession( $customerId );					
-		
+		return( $this->sendRequest( $action, $url, array() ) );
 	}
 	
-	public function updateInstitutionLoginChallenge( $loginId,
-													 $challengeResponse, 
-													 $challengeSession ) {
+	public function updateInstitutionLoginChallenge( $customerId,
+													 $loginId,
+													 $challengeNodeId,
+													 $challengeSessionId,
+													 $challengeResponses ) {
+
+		$headerAttribs = array ( 'challengeNodeId: ' .  $challengeNodeId,
+								 'challengeSessionId: ' .  $challengeSessionId
+		);
 	
 		$action = 'PUT';
 		$url = 'v1/logins/' . $loginId;													 
+		$postData['challengeResponses'] = new \stdClass;
+		$postData['challengeResponses']->response = $challengeResponses;
+
+		$this->initializeSession( $customerId );		
+		return( $this->sendRequest( $action, $url, array(), $postData, $headerAttribs ) );	
 	}
 
 	private function jsonDateConversion( $milliseconds ) {

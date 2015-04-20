@@ -131,7 +131,7 @@ class CustomerTransaction
             $updateVals = [];
         }
 
-        return count($transactions) . ' transactions processed.';
+        return count($transactions);
 
     }
 
@@ -188,6 +188,18 @@ class CustomerTransaction
         $resultSet->initialize( $result );
 
         return $resultSet->toArray();
+
+    }
+
+    public function deleteCustomer( $customerId ) {
+
+        $config   = $this->serviceLocator->get('Config');
+        $dbConfig = $config['db-intuit'];
+        $adapter  = new Adapter($dbConfig);
+
+        $sql        = "DELETE FROM customer_transaction WHERE `customerId` = {$customerId}";
+        $statement  = $adapter->createStatement($sql, []);
+        $result     = $statement->execute();
 
     }
 

@@ -119,7 +119,7 @@ class Bank
 
         $agencyId  = Bank::getBankAgencyId();
 
-        $sql = "SELECT bankName FROM bank WHERE bankAgencyId = {$agencyId}";
+        $sql = "SELECT bankId, bankAgencyId, bankName, baseUrl  FROM bank WHERE bankAgencyId = {$agencyId}";
 
         $statement = $adapter->createStatement($sql, []);
         $result = $statement->execute();

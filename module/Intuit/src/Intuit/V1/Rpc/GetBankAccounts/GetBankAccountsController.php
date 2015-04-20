@@ -8,7 +8,7 @@ class GetBankAccountsController extends AbstractActionController {
 
     public function getBankAccountsAction() {
 
-        $customerId     = $this->getEvent()->getRouteMatch()->getParam('customer_id');
+        $customerId     = $this->getEvent()->getRouteMatch()->getParam('customerId');
         $serviceLocator = $this->getServiceLocator();
 
         $customerAccount = new CustomerAccount( $serviceLocator );

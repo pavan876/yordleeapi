@@ -10,7 +10,6 @@ use Intuit\V1\Model\CustomerTransaction;
 
 class AddSiteAccountController extends AbstractActionController
 {
-	private $intuitInterface;
 
     public function addSiteAccountAction() {
     	$request = $this->getRequest();
@@ -38,12 +37,9 @@ class AddSiteAccountController extends AbstractActionController
 			    		}
 
 		    			$account = new CustomerAccount( $this->getServiceLocator() );
-		    			$result->message = $account->persistCustomerAccounts( $data->customer_id, $bankingAccounts );
-		    			$transactionResults = $this->addAccountTransactions( $data->customer_id, $bankingAccounts );
+		    			$result->accounts = $account->persistCustomerAccounts( $data->customerId, $bankingAccounts );
+		    			$result->transactions = $this->addAccountTransactions( $data->customerId, $bankingAccounts );
 
-		    			$result->message = $result->message . "\n" . implode( "\n", $transactionResults );
-
-		    			$intuitInterface = null;
 			            return $response->setContent( json_encode( $result ) );
 			            break;
 			    case 'challenge':
@@ -51,18 +47,15 @@ class AddSiteAccountController extends AbstractActionController
 			            break;
 			    default: 
 	            	if( $intuitResult->error == null ) {
-		    			$intuitInterface = null;
 	            		return new ApiProblem( 500, 'Unknown error' );
 	            	}
 	            	else {
-		    			$intuitInterface = null;
 	            		return new ApiProblem( 500, json_encode( $intuitResult->error ) );
 	            	}
 	            	break;
             }
 
         } else {
-	    	$intuitInterface = null;
             return new ApiProblem(405, 'Method not allowed');
         }
         
@@ -70,8 +63,8 @@ class AddSiteAccountController extends AbstractActionController
 
     protected function processIntuitRequest( $data ) {
 
-    	    $this->intuitInterface = new IntuitInterface( );
-    		$intuitResult = $this->intuitInterface->discoverAndAddAccounts( $data->customer_id, $data->bank_id, $data->login_parameters );
+    	    $intuitInterface = new IntuitInterface( );
+    		$intuitResult = $intuitInterface->discoverAndAddAccounts( $data->customerId, $data->bankId, $data->loginParameters );
 
     		return $intuitResult;
     }
@@ -82,18 +75,25 @@ class AddSiteAccountController extends AbstractActionController
     	$yesteryear = date( 'Y-m-d', mktime( 0, 0, 0, date( 'm' ), date( 'd' ), date( 'Y') - 1 ) );
     	$yesterday = date( 'Y-m-d', mktime( 0, 0, 0, date( 'm' ), date( 'd' ) - 1, date( 'Y') ) );
 
+        $intuitInterface = new IntuitInterface( );
     	$xaction = new CustomerTransaction( $this->getServiceLocator() );
-    	$results = [];
+    	$errors = [];
+        $xactionsAdded = 0;
     	foreach( $accounts as $account ) {
-    		$result = $this->intuitInterface->getAccountTransactions( $customerId, $account->accountId, $yesteryear, $yesterday );
+    		$result = $intuitInterface->getAccountTransactions( $customerId, $account->accountId, $yesteryear, $yesterday );
     		if( $result->result == 'success' ) {
-    			$results[] = $xaction->persistCustomerTransactions( $customerId, $account->institutionId, $bankAgencyId, $account->accountId, $result->data->bankingTransactions );
+    			$xactionsAdded += $xaction->persistCustomerTransactions( $customerId, $account->institutionId, $bankAgencyId, $account->accountId, $result->data->bankingTransactions );
     		} else {
     			$error = ($result->error == null)?('Unknown error'):(json_encode($result->error));
-    			$results[] = "Error encountered when retrieving transactiosn for {$account->accountNumber}: {$error}";
+    			$errors[] = "Error encountered when retrieving transactiosn for {$account->accountNumber}: {$error}";
     		}
     	}
 
-    	return $results;
+        $result = new \stdClass;
+        $result->transactions = $xactionsAdded;
+        $result->errors = $errors;
+
+
+    	return $result;
     }
 }

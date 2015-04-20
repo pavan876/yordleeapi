@@ -12,11 +12,9 @@ class RefreshBankListController extends AbstractActionController
 
 		$request = $this->getRequest();
         if ($request->isPost()) {
-            $data = $request->getContent();
-            $data = json_decode($data);
 
     		$intuit = new IntuitInterface( );
-    		$result = $intuit->getInstitutions( $data->customer_id );
+    		$result = $intuit->getInstitutions( 'privpass' );
 
     		if( $result->result == 'success' ) {
     			$bank = new Bank( $this->getServiceLocator() );
@@ -27,7 +25,10 @@ class RefreshBankListController extends AbstractActionController
             	$response->getHeaders()->addHeaders(array(
             	    'Content-Type' => 'application/json',
             	));
-            	return $response->setContent( "{$count} banks loaded.");
+
+                $respDetails->result = 'success';
+                $respDetails->banksLoaded = $count;
+            	return $response->setContent( $respDetails );
             } else {
             	if( $result->error == null )
             		return new ApiProblem( 500, 'Unknown error' );

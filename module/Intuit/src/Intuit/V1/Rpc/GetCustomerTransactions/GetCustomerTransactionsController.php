@@ -8,32 +8,36 @@ class GetCustomerTransactionsController extends AbstractActionController {
 
     public function getCustomerTransactionsAction() {
 
-        $customerId     = $this->getEvent()->getRouteMatch()->getParam('customer_id');
-        $page             = $this->getRequest()->getQuery('page');
-        $limit            = $this->getRequest()->getQuery('limit');
+        $customerId     = $this->getEvent()->getRouteMatch()->getParam( 'customerId', null );
+        $accountId      = $this->getEvent()->getRouteMatch()->getParam( 'accountId', null );
+        $limit            = $this->getRequest()->getQuery( 'limit', 50 );
+        $page            = $this->getRequest()->getQuery( 'page', 1 );
         $serviceLocator = $this->getServiceLocator();
 
         $start = 0;
         if (isset($limit) && is_numeric($limit)) {
             $limit = (int) $limit;
-            if (isset($page) && is_numeric($page)) {
-                $page = (int) $page;
-                if ($page == 1) {
-                    $page = 0;
-                } else {
-                    $page--;
-                }
-
-                $start = $page * $limit;
-            } else {
-                $start = 0;
-            }
         } else {
-        	$limit = 50;
+            $limit = 50;
+        }
+
+        if (isset($page) && is_numeric($page)) {
+            $page = (int) $page;
+            if ($page == 1) {
+                 $page = 0;
+            } else {
+                $page--;
+            }
+
+            $start = $page * $limit;
+        } else {
+            $start = 0;
         }
 
         $customerXaction = new CustomerTransaction( $serviceLocator );
-        $result = $customerXaction->getTransactions( $customerId, null, null, null, $start, $limit );
+        $result = new \stdClass;
+        $result->result = 'success';
+        $result->transactions = $customerXaction->getTransactions( $customerId, $accountId, null, null, $start, $limit );
 
         $response = $this->getResponse();
         $response->getHeaders()->addHeaders(array(

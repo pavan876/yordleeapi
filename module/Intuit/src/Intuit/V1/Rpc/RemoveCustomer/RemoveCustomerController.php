@@ -3,6 +3,8 @@ namespace Intuit\V1\Rpc\RemoveCustomer;
 
 use Zend\Mvc\Controller\AbstractActionController;
 use Intuit\V1\Model\IntuitInterface;
+use Intuit\V1\Model\CustomerTransaction;
+use Intuit\V1\Model\CustomerAccount;
 
 class RemoveCustomerController extends AbstractActionController
 {
@@ -10,14 +12,21 @@ class RemoveCustomerController extends AbstractActionController
     {
 
 		$request = $this->getRequest();
+        $serviceLocator = $this->getServiceLocator();
         if ($request->isPost()) {
             $data = $request->getContent();
             $data = json_decode($data);
 
     		$intuit = new IntuitInterface( );
-    		$result = $intuit->deleteCustomer( $data->customer_id );
+    		$result = $intuit->deleteCustomer( $data->customerId );
 
     		if( $result->result == 'success' ) {
+
+                $customerXaction = new CustomerTransaction( $serviceLocator );
+                $customerXaction->deleteCustomer( $data->customerId );
+
+                $customerAccount = new CustomerAccount( $serviceLocator );
+                $customerAccount->deleteCustomer( $data->customerId );
 
             	$response = $this->getResponse();
             	$response->getHeaders()->addHeaders(array(

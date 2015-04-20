@@ -25,6 +25,7 @@ CREATE TABLE `customer_account` (
   `accountId` bigint(20) NOT NULL,
   `accountNumber` bigint(20) NOT NULL,  
   `accountNickname` varchar(50) NOT NULL,
+  `loginId` bigint(20) NULL,
   `customerId` bigint(20) NOT NULL,
   `bankId` varchar(10) NOT NULL,
   `bankAgencyId` int(11) NOT NULL,
@@ -59,38 +60,39 @@ class CustomerAccount
         $dbConfig = $config['db-intuit'];
         $adapter  = new Adapter($dbConfig);
 
-        $sql2 = [];
-        $fp   = function ($name) use ($adapter) {
-            return $adapter->platform->quoteValue($name);
+        $setOrNull = function( $obj, $attr ) {
 
+          return (isset( $obj->$attr ))?($obj->$attr):('NULL');
         };
+
         $bankCount = 0;
         foreach ($data as $key => $item) {
             // Only process bank accounts
             if( $item->type != 'bankingAccount' ) continue;
             $bankCount++;
-            $accountId          = $item->accountId;
-            $accountNumber      = $item->accountNumber;
-            $accountNickname    = $item->accountNickname;
-            $bankId             = $item->institutionId;
+            $accountId          = $setOrNull($item, 'accountId');
+            $accountNumber      = $setOrNull($item, 'accountNumber');
+            $accountNickname    = $setOrNull($item, 'accountNickname');
+            $loginId            = $setOrNull($item, 'loginId');
+            $bankId             = $setOrNull($item, 'institutionId');
             $bankAgencyId       = Bank::getBankAgencyId();
-            $accountType        = $item->bankingAccountType;
-            $currencyCode       = $item->currencyCode;
+            $accountType        = $setOrNull($item, 'bankingAccountType');
+            $currencyCode       = $setOrNull($item, 'currencyCode');
             $active             = ($item->status == 'ACTIVE')?(1):(0);
-            $displayPosition    = $item->displayPosition;
-            $balanceAmount      = $item->balanceAmount;
+            $displayPosition    = $setOrNull($item, 'displayPosition');
+            $balanceAmount      = $setOrNull($item, 'balanceAmount');
             $balanceDate        = substr( $item->balanceDate, 0, 10 );
 
 
-            $sql   = 'INSERT INTO customer_account (customerId, accountId, accountNumber, accountNickname, bankId, bankAgencyId, accountType, currencyCode, active, displayPosition, balanceAmount, balanceDate )';
-            $sql   .= " VALUES ('{$customerId}', {$accountId}, {$accountNumber}, '{$accountNickname}', '{$bankId}', {$bankAgencyId}, '{$accountType}', '{$currencyCode}', {$active}, {$displayPosition}, {$balanceAmount}, '{$balanceDate}')";
+            $sql   = 'INSERT INTO customer_account (customerId, accountId, accountNumber, accountNickname, loginId, bankId, bankAgencyId, accountType, currencyCode, active, displayPosition, balanceAmount, balanceDate )';
+            $sql   .= " VALUES ('{$customerId}', {$accountId}, {$accountNumber}, '{$accountNickname}', {$loginId}, '{$bankId}', {$bankAgencyId}, '{$accountType}', '{$currencyCode}', {$active}, {$displayPosition}, {$balanceAmount}, '{$balanceDate}')";
             $sql   .= " ON DUPLICATE KEY UPDATE `accountNickname`='{$accountNickname}', `active`={$active}, `displayPosition`={$displayPosition}, `balanceAmount`={$balanceAmount}, `balanceDate` = '{$balanceDate}'";
 
             $statement = $adapter->createStatement($sql, []);
             $result    = $statement->execute();
         }
 
-        return "{$bankCount} accounts added.";
+        return $bankCount;
 
     }
 
@@ -124,6 +126,18 @@ class CustomerAccount
         $resultSet->initialize( $result );
 
         return $resultSet->toArray();
+
+    }
+
+    public function deleteCustomer( $customerId ) {
+
+        $config   = $this->serviceLocator->get('Config');
+        $dbConfig = $config['db-intuit'];
+        $adapter  = new Adapter($dbConfig);
+
+        $sql        = "DELETE FROM customer_account WHERE `customerId` = {$customerId}";
+        $statement  = $adapter->createStatement($sql, []);
+        $result     = $statement->execute();
 
     }
 

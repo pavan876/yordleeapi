@@ -15,9 +15,9 @@ class MFARequestForSiteController extends AddSiteAccountController {
     protected function processIntuitRequest( $data ) {
 
     	    $this->intuitInterface = new IntuitInterface( );
-    		$intuitResult = $this->intuitInterface->discoverAndAddAccountsChallenge( $data->customer_id, $data->bank_id, 
-    																					$data->challenge_node_id, $data->challenge_session_id, 
-    																					$data->challenge_responses );
+    		$intuitResult = $this->intuitInterface->discoverAndAddAccountsChallenge( $data->customerId, $data->bankId, 
+    																					$data->challengeNodeId, $data->challengeSessionId, 
+    																					$data->challengeResponses );
 
     		return $intuitResult;
     }

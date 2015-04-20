@@ -13,8 +13,8 @@ class FetchTransactionByAccountController extends AbstractActionController {
 	private $customerTransaction;
 
     public function fetchTransactionByAccountAction() {
-    	$customerId     = $this->getEvent()->getRouteMatch()->getParam('customer_id');
-    	$accountId 		= $this->getEvent()->getRouteMatch()->getParam('account_id');
+    	$customerId     = $this->getEvent()->getRouteMatch()->getParam('customerId');
+    	$accountId 		= $this->getEvent()->getRouteMatch()->getParam('accountId');
         $serviceLocator = $this->getServiceLocator();
 
         $account = new CustomerAccount( $serviceLocator );
@@ -28,7 +28,7 @@ class FetchTransactionByAccountController extends AbstractActionController {
         } else {
         	$this->updateAccountTransactions( $customerId, $accountInfo );
         	$result->result = 'success';
-        	$result->transcations = $this->customerTransaction->getTransactions( $customerId, $accountId );
+        	$result->transactions = $this->customerTransaction->getTransactions( $customerId, $accountId );
         }
 
         $response = $this->getResponse();

@@ -15,7 +15,7 @@ class BankSearchController extends AbstractActionController
             $data = json_decode($data);
 
            	$bank = new Bank( $this->getServiceLocator() );
-           	$results = $bank->searchBanks( $data->search_string );
+           	$results = $bank->searchBanks( $data->searchString );
 
            	$response = $this->getResponse();
            	$response->getHeaders()->addHeaders(array(
