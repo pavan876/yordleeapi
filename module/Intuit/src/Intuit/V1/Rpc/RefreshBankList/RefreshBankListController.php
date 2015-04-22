@@ -26,9 +26,10 @@ class RefreshBankListController extends AbstractActionController
             	    'Content-Type' => 'application/json',
             	));
 
+                $respDetails = new \stdClass;
                 $respDetails->result = 'success';
                 $respDetails->banksLoaded = $count;
-            	return $response->setContent( $respDetails );
+            	return $response->setContent( json_encode( $respDetails ) );
             } else {
             	if( $result->error == null )
             		return new ApiProblem( 500, 'Unknown error' );
