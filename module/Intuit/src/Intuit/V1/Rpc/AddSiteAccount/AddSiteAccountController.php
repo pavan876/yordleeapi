@@ -29,16 +29,11 @@ class AddSiteAccountController extends AbstractActionController
     			case 'success':
 		    			$result = new \stdClass;
 			    		$result->result = 'success';
-
-			    		$bankingAccounts = [];
-			    		foreach( $intuitResult->data->accounts as $account ) {
-			    			if( $account->type == 'bankingAccount' )
-			    				$bankingAccounts[] = $account;
-			    		}
+                        $accounts = $intuitResult->data->accounts;
 
 		    			$account = new CustomerAccount( $this->getServiceLocator() );
-		    			$result->accounts = $account->persistCustomerAccounts( $data->customerId, $bankingAccounts );
-		    			$result->transactions = $this->addAccountTransactions( $data->customerId, $bankingAccounts );
+		    			$result->accounts = $account->persistCustomerAccounts( $data->customerId, $accounts );
+		    			$result->transactions = $this->addAccountTransactions( $data->customerId, $accounts );
 
 			            return $response->setContent( json_encode( $result ) );
 			            break;
@@ -82,10 +77,13 @@ class AddSiteAccountController extends AbstractActionController
     	foreach( $accounts as $account ) {
     		$result = $intuitInterface->getAccountTransactions( $customerId, $account->accountId, $yesteryear, $yesterday );
     		if( $result->result == 'success' ) {
-    			$xactionsAdded += $xaction->persistCustomerTransactions( $customerId, $account->institutionId, $bankAgencyId, $account->accountId, $result->data->bankingTransactions );
+                if( isset( $result->data->bankingTransactions ) )
+    			    $xactionsAdded += $xaction->persistCustomerTransactions( $customerId, $account->institutionId, $bankAgencyId, $account->accountId, $result->data->bankingTransactions );
+                if( isset( $result->data->creditCardTransactions ) )
+                    $xactionsAdded += $xaction->persistCustomerTransactions( $customerId, $account->institutionId, $bankAgencyId, $account->accountId, $result->data->creditCardTransactions );
     		} else {
     			$error = ($result->error == null)?('Unknown error'):(json_encode($result->error));
-    			$errors[] = "Error encountered when retrieving transactiosn for {$account->accountNumber}: {$error}";
+    			$errors[] = "Error encountered when retrieving transactions for {$account->accountNumber}: {$error}";
     		}
     	}
 

@@ -43,6 +43,7 @@ CREATE TABLE `customer_account` (
 class CustomerAccount
 {
     private $serviceLocator;
+    private $adapter;
 
     /**
      * @param $serviceLocator
@@ -52,48 +53,80 @@ class CustomerAccount
         $this->serviceLocator = $serviceLocator;
     }
 
+    private function setOrNull( $obj, $attr ) {
+
+          return (isset( $obj->$attr ))?($obj->$attr):('NULL');
+    }
+
     public function persistCustomerAccounts($customerId, $data)
     {
 
         //$data     = json_decode($data, TRUE);
         $config   = $this->serviceLocator->get('Config');
         $dbConfig = $config['db-intuit'];
-        $adapter  = new Adapter($dbConfig);
-
-        $setOrNull = function( $obj, $attr ) {
-
-          return (isset( $obj->$attr ))?($obj->$attr):('NULL');
-        };
-
-        $bankCount = 0;
-        foreach ($data as $key => $item) {
-            // Only process bank accounts
-            if( $item->type != 'bankingAccount' ) continue;
-            $bankCount++;
-            $accountId          = $setOrNull($item, 'accountId');
-            $accountNumber      = $setOrNull($item, 'accountNumber');
-            $accountNickname    = $setOrNull($item, 'accountNickname');
-            $loginId            = $setOrNull($item, 'loginId');
-            $bankId             = $setOrNull($item, 'institutionId');
-            $bankAgencyId       = Bank::getBankAgencyId();
-            $accountType        = $setOrNull($item, 'bankingAccountType');
-            $currencyCode       = $setOrNull($item, 'currencyCode');
-            $active             = ($item->status == 'ACTIVE')?(1):(0);
-            $displayPosition    = $setOrNull($item, 'displayPosition');
-            $balanceAmount      = $setOrNull($item, 'balanceAmount');
-            $balanceDate        = substr( $item->balanceDate, 0, 10 );
+        $this->adapter  = new Adapter($dbConfig);
 
 
-            $sql   = 'INSERT INTO customer_account (customerId, accountId, accountNumber, accountNickname, loginId, bankId, bankAgencyId, accountType, currencyCode, active, displayPosition, balanceAmount, balanceDate )';
-            $sql   .= " VALUES ('{$customerId}', {$accountId}, {$accountNumber}, '{$accountNickname}', {$loginId}, '{$bankId}', {$bankAgencyId}, '{$accountType}', '{$currencyCode}', {$active}, {$displayPosition}, {$balanceAmount}, '{$balanceDate}')";
-            $sql   .= " ON DUPLICATE KEY UPDATE `accountNickname`='{$accountNickname}', `active`={$active}, `displayPosition`={$displayPosition}, `balanceAmount`={$balanceAmount}, `balanceDate` = '{$balanceDate}'";
+        $accounts = 0;
+        foreach( $data as $account ) {
 
-            $statement = $adapter->createStatement($sql, []);
-            $result    = $statement->execute();
+          switch( $account->type ) {
+            case 'bankingAccount':  $this->persistBankAccount( $customerId, $account );
+                                    $accounts++;
+                                    break;
+            case 'creditAccount':   $this->persistCCAccount( $customerId, $account );
+                                    $accounts++;
+                                    break;
+          }
         }
 
-        return $bankCount;
+        return $accounts;
+    }
 
+    private function persistCCAccount( $customerId, $account ) {
+
+      $accountId          = $this->setOrNull($account, 'accountId');
+      $accountNumber      = $this->setOrNull($account, 'accountNumber');
+      $accountNickname    = $this->setOrNull($account, 'accountNickname');
+      $loginId            = $this->setOrNull($account, 'loginId');
+      $bankId             = $this->setOrNull($account, 'institutionId');
+      $bankAgencyId       = Bank::getBankAgencyId();
+      $accountType        = $this->setOrNull($account, 'creditAccountType');
+      $currencyCode       = $this->setOrNull($account, 'currencyCode');
+      $active             = ($account->status == 'ACTIVE')?(1):(0);
+      $displayPosition    = $this->setOrNull($account, 'displayPosition');
+      $balanceAmount      = $this->setOrNull($account, 'currentBalance');
+      $balanceDate        = date( 'Y-m-d' );
+
+      $sql   = 'INSERT INTO customer_account (customerId, accountId, accountNumber, accountNickname, loginId, bankId, bankAgencyId, accountType, currencyCode, active, displayPosition, balanceAmount, balanceDate )';
+      $sql   .= " VALUES ('{$customerId}', {$accountId}, {$accountNumber}, '{$accountNickname}', {$loginId}, '{$bankId}', {$bankAgencyId}, '{$accountType}', '{$currencyCode}', {$active}, {$displayPosition}, {$balanceAmount}, '{$balanceDate}')";
+      $sql   .= " ON DUPLICATE KEY UPDATE `accountNickname`='{$accountNickname}', `active`={$active}, `displayPosition`={$displayPosition}, `balanceAmount`={$balanceAmount}, `balanceDate` = '{$balanceDate}'";
+
+      $statement = $this->adapter->createStatement($sql, []);
+      $result    = $statement->execute();
+    }
+
+    private function persistBankAccount( $customerId, $account ) {
+
+      $accountId          = $this->setOrNull($account, 'accountId');
+      $accountNumber      = $this->setOrNull($account, 'accountNumber');
+      $accountNickname    = $this->setOrNull($account, 'accountNickname');
+      $loginId            = $this->setOrNull($account, 'loginId');
+      $bankId             = $this->setOrNull($account, 'institutionId');
+      $bankAgencyId       = Bank::getBankAgencyId();
+      $accountType        = $this->setOrNull($account, 'bankingAccountType');
+      $currencyCode       = $this->setOrNull($account, 'currencyCode');
+      $active             = ($account->status == 'ACTIVE')?(1):(0);
+      $displayPosition    = $this->setOrNull($account, 'displayPosition');
+      $balanceAmount      = $this->setOrNull($account, 'balanceAmount');
+      $balanceDate        = substr( $account->balanceDate, 0, 10 );
+
+      $sql   = 'INSERT INTO customer_account (customerId, accountId, accountNumber, accountNickname, loginId, bankId, bankAgencyId, accountType, currencyCode, active, displayPosition, balanceAmount, balanceDate )';
+      $sql   .= " VALUES ('{$customerId}', {$accountId}, {$accountNumber}, '{$accountNickname}', {$loginId}, '{$bankId}', {$bankAgencyId}, '{$accountType}', '{$currencyCode}', {$active}, {$displayPosition}, {$balanceAmount}, '{$balanceDate}')";
+      $sql   .= " ON DUPLICATE KEY UPDATE `accountNickname`='{$accountNickname}', `active`={$active}, `displayPosition`={$displayPosition}, `balanceAmount`={$balanceAmount}, `balanceDate` = '{$balanceDate}'";
+
+      $statement = $this->adapter->createStatement($sql, []);
+      $result    = $statement->execute();
     }
 
     public function getAccountInfo( $customerId, $accountId ) {
