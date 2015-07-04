@@ -229,6 +229,8 @@ class IntuitInterface {
 		$jsonResponse = json_decode( substr( $r, $header_size ) );
 
 		$this->traverseResponse( $jsonResponse );
+
+		error_log( var_export( $jsonResponse, true ) );
 		
 		switch( curl_getinfo( $ch, CURLINFO_HTTP_CODE ) ) {
 			case 200:
@@ -275,6 +277,8 @@ class IntuitInterface {
 		
 		$parameters['oauth_signature_method'] = 'HMAC-SHA1';
 		$parameters['Host'] = FINANCIAL_FEED_HOST;
+
+		error_log( var_export( $oauthObject, true ) );
 		
 		return( $oauthObject->sign(array(
 								'path'      => FINANCIAL_FEED_URL . $requestURL,
@@ -299,12 +303,13 @@ class IntuitInterface {
 								$headerAttribs
 						);
 
-		//$parameters = array_merge( $auth['parameters'], $parameters );
+		$parameters = array_merge( $auth['parameters'], $parameters );
 
 		$options = array();
 		$options[CURLOPT_VERBOSE] = 0;
 		$options[CURLOPT_RETURNTRANSFER] = 1;
 		$options[CURLOPT_HEADER] = 1;
+		$options[CURLOPT_SSL_VERIFYPEER] = 0;
 		$options[CURLINFO_HEADER_OUT] = 1;
 		$options[CURLOPT_CUSTOMREQUEST] = $action;
 		$options[CURLOPT_URL] = $auth['signed_url'];

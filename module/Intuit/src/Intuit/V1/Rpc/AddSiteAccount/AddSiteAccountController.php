@@ -37,13 +37,15 @@ class AddSiteAccountController extends AbstractActionController
 		    			$result->transactions = $this->addAccountTransactions( $data->customerId, $accounts );
 
                         $result->otherAccounts = array();
-                        foreach( $accounts as $account ) {
+                        foreach( $accounts as $acct ) {
 
-                            $otherAccount = new stdObject();
-                            $otherAccount->accountId = $account->accountId;
-                            $otherAccount->bankId = $account->institutionId;
-                            $otherAccount->accountNickname = $account->accountNickname;
-                            $otherAccount->description = $account->description;
+                            if( $acct->type != 'otherAccount' ) continue;
+
+                            $otherAccount = new \stdClass;
+                            $otherAccount->accountId = $acct->accountId;
+                            $otherAccount->bankId = $acct->institutionId;
+                            $otherAccount->accountNickname = $acct->accountNickname;
+                            $otherAccount->description = $acct->description;
 
                             $results->otherAccounts[] = $otherAccount;
                         }
@@ -88,7 +90,7 @@ class AddSiteAccountController extends AbstractActionController
     	$errors = [];
         $xactionsAdded = 0;
     	foreach( $accounts as $account ) {
-            if( in_array( $account->accountType, array( 'bankingAccount', 'creditAccount' ) ) ) {
+            if( in_array( $account->type, array( 'bankingAccount', 'creditAccount' ) ) ) {
         		$result = $intuitInterface->getAccountTransactions( $customerId, $account->accountId, $yesteryear, $yesterday );
         		if( $result->result == 'success' ) {
                     if( isset( $result->data->bankingTransactions ) )
