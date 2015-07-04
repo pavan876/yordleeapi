@@ -15,6 +15,7 @@ return array(
             'Intuit\\V1\\Rpc\\GetCustomerTransactions\\Controller' => 'Intuit\\V1\\Rpc\\GetCustomerTransactions\\GetCustomerTransactionsControllerFactory',
             'Intuit\\V1\\Rpc\\RefreshBankLogin\\Controller' => 'Intuit\\V1\\Rpc\\RefreshBankLogin\\RefreshBankLoginControllerFactory',
             'Intuit\\V1\\Rpc\\MFARequestForRefresh\\Controller' => 'Intuit\\V1\\Rpc\\MFARequestForRefresh\\MFARequestForRefreshControllerFactory',
+            'Intuit\\V1\\Rpc\\UpdateBankAccountType\\Controller' => 'Intuit\\V1\\Rpc\\UpdateBankAccountType\\UpdateBankAccountTypeControllerFactory',
         ),
     ),
     'router' => array(
@@ -139,6 +140,16 @@ return array(
                     ),
                 ),
             ),
+            'intuit.rpc.update-bank-account-type' => array(
+                'type' => 'Segment',
+                'options' => array(
+                    'route' => '/api/intuit/update-bank-account-type',
+                    'defaults' => array(
+                        'controller' => 'Intuit\\V1\\Rpc\\UpdateBankAccountType\\Controller',
+                        'action' => 'updateBankAccountType',
+                    ),
+                ),
+            ),
         ),
     ),
     'zf-versioning' => array(
@@ -155,6 +166,7 @@ return array(
             9 => 'intuit.rpc.get-customer-transactions',
             11 => 'intuit.rpc.refresh-bank-login',
             12 => 'intuit.rpc.mfa-request-for-refresh',
+            13 => 'intuit.rpc.update-bank-account-type',
         ),
     ),
     'zf-rpc' => array(
@@ -242,6 +254,13 @@ return array(
             ),
             'route_name' => 'intuit.rpc.mfa-request-for-refresh',
         ),
+        'Intuit\\V1\\Rpc\\UpdateBankAccountType\\Controller' => array(
+            'service_name' => 'UpdateBankAccountType',
+            'http_methods' => array(
+                0 => 'POST',
+            ),
+            'route_name' => 'intuit.rpc.update-bank-account-type',
+        ),
     ),
     'zf-content-negotiation' => array(
         'controllers' => array(
@@ -258,6 +277,7 @@ return array(
             'Intuit\\V1\\Rpc\\GetCustomerTransactions\\Controller' => 'Json',
             'Intuit\\V1\\Rpc\\RefreshBankLogin\\Controller' => 'Json',
             'Intuit\\V1\\Rpc\\MFARequestForRefresh\\Controller' => 'Json',
+            'Intuit\\V1\\Rpc\\UpdateBankAccountType\\Controller' => 'Json',
         ),
         'accept_whitelist' => array(
             'Intuit\\V1\\Rpc\\BankSearch\\Controller' => array(
@@ -325,6 +345,11 @@ return array(
                 1 => 'application/json',
                 2 => 'application/*+json',
             ),
+            'Intuit\\V1\\Rpc\\UpdateBankAccountType\\Controller' => array(
+                0 => 'application/vnd.intuit.v1+json',
+                1 => 'application/json',
+                2 => 'application/*+json',
+            ),
         ),
         'content_type_whitelist' => array(
             'Intuit\\V1\\Rpc\\BankSearch\\Controller' => array(
@@ -376,6 +401,10 @@ return array(
                 1 => 'application/json',
             ),
             'Intuit\\V1\\Rpc\\MFARequestForRefresh\\Controller' => array(
+                0 => 'application/vnd.intuit.v1+json',
+                1 => 'application/json',
+            ),
+            'Intuit\\V1\\Rpc\\UpdateBankAccountType\\Controller' => array(
                 0 => 'application/vnd.intuit.v1+json',
                 1 => 'application/json',
             ),

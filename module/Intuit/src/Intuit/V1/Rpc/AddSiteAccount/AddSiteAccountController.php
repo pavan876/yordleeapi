@@ -10,6 +10,7 @@ use Intuit\V1\Model\CustomerTransaction;
 
 class AddSiteAccountController extends AbstractActionController
 {
+    protected $accountTransactions;
 
     public function addSiteAccountAction() {
     	$request = $this->getRequest();
@@ -34,6 +35,18 @@ class AddSiteAccountController extends AbstractActionController
 		    			$account = new CustomerAccount( $this->getServiceLocator() );
 		    			$result->accounts = $account->persistCustomerAccounts( $data->customerId, $accounts );
 		    			$result->transactions = $this->addAccountTransactions( $data->customerId, $accounts );
+
+                        $result->otherAccounts = array();
+                        foreach( $accounts as $account ) {
+
+                            $otherAccount = new stdObject();
+                            $otherAccount->accountId = $account->accountId;
+                            $otherAccount->bankId = $account->institutionId;
+                            $otherAccount->accountNickname = $account->accountNickname;
+                            $otherAccount->description = $account->description;
+
+                            $results->otherAccounts[] = $otherAccount;
+                        }
 
 			            return $response->setContent( json_encode( $result ) );
 			            break;
@@ -75,16 +88,18 @@ class AddSiteAccountController extends AbstractActionController
     	$errors = [];
         $xactionsAdded = 0;
     	foreach( $accounts as $account ) {
-    		$result = $intuitInterface->getAccountTransactions( $customerId, $account->accountId, $yesteryear, $yesterday );
-    		if( $result->result == 'success' ) {
-                if( isset( $result->data->bankingTransactions ) )
-    			    $xactionsAdded += $xaction->persistCustomerTransactions( $customerId, $account->institutionId, $bankAgencyId, $account->accountId, $result->data->bankingTransactions );
-                if( isset( $result->data->creditCardTransactions ) )
-                    $xactionsAdded += $xaction->persistCustomerTransactions( $customerId, $account->institutionId, $bankAgencyId, $account->accountId, $result->data->creditCardTransactions );
-    		} else {
-    			$error = ($result->error == null)?('Unknown error'):(json_encode($result->error));
-    			$errors[] = "Error encountered when retrieving transactions for {$account->accountNumber}: {$error}";
-    		}
+            if( in_array( $account->accountType, array( 'bankingAccount', 'creditAccount' ) ) ) {
+        		$result = $intuitInterface->getAccountTransactions( $customerId, $account->accountId, $yesteryear, $yesterday );
+        		if( $result->result == 'success' ) {
+                    if( isset( $result->data->bankingTransactions ) )
+        			    $xactionsAdded += $xaction->persistCustomerTransactions( $customerId, $account->institutionId, $bankAgencyId, $account->accountId, $result->data->bankingTransactions );
+                    if( isset( $result->data->creditCardTransactions ) )
+                        $xactionsAdded += $xaction->persistCustomerTransactions( $customerId, $account->institutionId, $bankAgencyId, $account->accountId, $result->data->creditCardTransactions );
+        		} else {
+        			$error = ($result->error == null)?('Unknown error'):(json_encode($result->error));
+        			$errors[] = "Error encountered when retrieving transactions for {$account->accountNumber}: {$error}";
+        		}
+            }            
     	}
 
         $result = new \stdClass;

@@ -196,59 +196,6 @@ return array(
         ),
         'description' => 'Return the set of transactions for the Customer across all account for Customer Identifier. If the Account Identifier is given, then filter the transactions for that account only. Pagination is support when paging is identified as true, and a page and/or limit is provided. By default, the first 50 results are returned.',
     ),
-    'Intuit\\V1\\Rpc\\AddSiteAccount\\Controller' => array(
-        'POST' => array(
-            'description' => 'Adds accounts from a bank for the identified customer and returns the number of accounts and transactions received.',
-            'request' => '{
-"customerId" : "Customer ID",  // Important as this is used to access all Customer Financial Account & Transactions
-"bankId" : "Bank ID",
-"loginParameters": [
-    { 
-      "name": "Banking Userid", // Name from Get Site Login Form
-      "value": "direct" // Value provided by the Customer
-    },
-    { 
-      "name": "Banking Password",
-      "value": "anyvalue"
-    }
-
-]
-}',
-            'response' => '{
-    "result": "success",
-    "accounts": Count,
-    "transactions": {
-        "transactions": Count,
-        "errors": [] // list of errors, if any
-    }
-}
-
-{
-    "result": "challenge",
-    "data": {
-        "challenge": [
-            {  // One ore more of the following 
-                "textOrImageAndChoice": [
-                    "Question to which customer provides an open response"
-                ],
-                "textOrImageAndChoice": [
-                    "Question to which customer selects a response",
-                    { "val": "Option1", "text":"Display Text 1" },
-                    { "val": "Option2", "text":"Display Text 2" }
-                ],
-                "textOrImageAndChoice": [
-                    "Image prompt",
-                    "base64 encoded image"
-                ]
-            }
-        ],
-        "challengeNodeId": "IP Address",
-        "challengeSessionId": "hexadecimal code"
-    }
-}',
-        ),
-        'description' => 'Adds accounts from a bank for the identified customer.',
-    ),
     'Intuit\\V1\\Rpc\\RefreshBankLogin\\Controller' => array(
         'POST' => array(
             'description' => 'User RefreshBankLogin whenever a 103 error is returned to reset authorization.',
@@ -380,5 +327,88 @@ return array(
 }',
         ),
         'description' => 'Accepts Challenge Response for Refresh Bank Login identified by the Challenge Node and Session Ids.',
+    ),
+    'Intuit\\V1\\Rpc\\AddSiteAccount\\Controller' => array(
+        'POST' => array(
+            'description' => 'Adds accounts from a bank for the identified customer and returns the number of accounts and transactions received.',
+            'request' => '{
+"customerId" : "Customer ID",  // Important as this is used to access all Customer Financial Account & Transactions
+"bankId" : "Bank ID",
+"loginParameters": [
+    { 
+      "name": "Banking Userid", // Name from Get Site Login Form
+      "value": "direct" // Value provided by the Customer
+    },
+    { 
+      "name": "Banking Password",
+      "value": "anyvalue"
+    }
+
+]
+}',
+            'response' => '{
+    "result": "success",
+    "accounts": Count,
+    "transactions": {
+        "transactions": Count,
+        "errors": [] // list of errors, if any
+    }
+   "otherAccounts":[
+      { 
+         "accountId" : "Unique Account Id",
+         "bankId" : "Unique Bank Id",
+         "accountNickname" : "Name the Customer Uses to Identify the Account",
+         "description" : "Description of this Account"
+       }
+   ]
+}
+
+{
+    "result": "challenge",
+    "data": {
+        "challenge": [
+            {  // One ore more of the following 
+                "textOrImageAndChoice": [
+                    "Question to which customer provides an open response"
+                ],
+                "textOrImageAndChoice": [
+                    "Question to which customer selects a response",
+                    { "val": "Option1", "text":"Display Text 1" },
+                    { "val": "Option2", "text":"Display Text 2" }
+                ],
+                "textOrImageAndChoice": [
+                    "Image prompt",
+                    "base64 encoded image"
+                ]
+            }
+        ],
+        "challengeNodeId": "IP Address",
+        "challengeSessionId": "hexadecimal code"
+    }
+}',
+        ),
+        'description' => 'Adds accounts from a bank for the identified customer.',
+    ),
+    'Intuit\\V1\\Rpc\\UpdateBankAccountType\\Controller' => array(
+        'GET' => array(
+            'description' => null,
+            'request' => null,
+            'response' => null,
+        ),
+        'POST' => array(
+            'description' => null,
+            'request' => '{
+   "customerId" : "Unique Customer Identifier",
+   "accountId" : "Unique Account Identifier",
+   "accountClassification" : "bankAccountType or creditAccountType",
+   "accountType" : "value from the below"
+   // bankAccountType: CHECKING, SAVINGS, MONEYMRKT, RECURRINGDEPOSIT, CD, CASHMANAGEMENT, OVERDRAFT
+   // creditAccountType: CREDITCARD, LINEOFCREDIT, OTHER"
+}',
+            'response' => '{
+     "result" : "success"
+}',
+        ),
+        'description' => 'Update the Account Type for Bank Account, generally used when an "other" shows up.',
     ),
 );

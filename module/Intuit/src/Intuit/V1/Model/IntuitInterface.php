@@ -138,12 +138,13 @@ class IntuitInterface {
 		return( $this->sendRequest( $action, $url ) );
 	}
 	
-	public function updateAcccountType( $accountId,
+	public function updateAcccountType( $customerId,
+										$accountId,
 										$accountClassification,
 										$accountType ) {
 	
 		$action = 'PUT';
-		$url = 'v1/logins/' . $accountId;
+		$url = 'v1/accounts/' . $accountId;
 		$parameters[$accountClassification] = $accountType;
 
 		$this->initializeSession( $customerId );					
