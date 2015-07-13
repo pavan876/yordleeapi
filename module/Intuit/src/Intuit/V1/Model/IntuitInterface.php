@@ -25,7 +25,7 @@ class IntuitInterface {
 		$url = 'v1/accounts/' . $accountId;
 
 		$this->initializeSession( $customerId );
-		return( $this->sendRequest( $action, $url ) );
+		return( $this->sendJSONRequest( $action, $url ) );
 		
 	}
 	
@@ -35,7 +35,7 @@ class IntuitInterface {
 		$url = 'v1/customers';
 		
 		$this->initializeSession( $customerId );
-		return( $this->sendRequest( $action, $url ) );
+		return( $this->sendJSONRequest( $action, $url ) );
 	}
 
 	public function discoverAndAddAccounts( $customerId, $institutionId, $institutionLoginParameters ) {
@@ -45,7 +45,7 @@ class IntuitInterface {
 		$postData['credentials']['credential'] = $institutionLoginParameters;
 
 		$this->initializeSession( $customerId );	
-		return( $this->sendRequest( $action, $url, array(), $postData ) );
+		return( $this->sendJSONRequest( $action, $url, array(), $postData ) );
 		
 	}
 	
@@ -65,7 +65,7 @@ class IntuitInterface {
 		$postData['challengeResponses']->response = $challengeResponses;
 
 		$this->initializeSession( $customerId );		
-		return( $this->sendRequest( $action, $url, array(), $postData, $headerAttribs ) );	
+		return( $this->sendJSONRequest( $action, $url, array(), $postData, $headerAttribs ) );	
 	}
 		
 	public function getAccount( $customerId, $accountId ) {
@@ -74,7 +74,7 @@ class IntuitInterface {
 		$url = 'v1/accounts/' . $accountId;
 
 		$this->initializeSession( $customerId );		
-		return( $this->sendRequest( $action, $url ) );
+		return( $this->sendJSONRequest( $action, $url ) );
 	}
 	
 	public function getAccountTransactions( $customerId,
@@ -90,7 +90,7 @@ class IntuitInterface {
 			$parameters['txnEndDate'] = $txnEndDate;
 
 		$this->initializeSession( $customerId );		
-		return( $this->sendRequest( $action, $url, $parameters ) );
+		return( $this->sendJSONRequest( $action, $url, $parameters ) );
 	}
 	
 	public function getCustomerAccounts( $customerId ) {
@@ -99,7 +99,7 @@ class IntuitInterface {
 		$url = 'v1/accounts';
 
 		$this->initializeSession( $customerId );				
-		return( $this->sendRequest( $action, $url ) );
+		return( $this->sendJSONRequest( $action, $url ) );
 	}
 	
 	public function getInstitutionDetails( $customerId, $institutionId ) {
@@ -108,7 +108,7 @@ class IntuitInterface {
 		$url = 'v1/institutions/' . $institutionId;
 
 		$this->initializeSession( $customerId );						
-		return( $this->sendRequest( $action, $url ) );
+		return( $this->sendJSONRequest( $action, $url ) );
 	}
 	
 	public function getInstitutions( $customerId ) {
@@ -117,7 +117,7 @@ class IntuitInterface {
 		$url = 'v1/institutions';
 		
 		$this->initializeSession( $customerId );				
-		return( $this->sendRequest( $action, $url ) );	
+		return( $this->sendJSONRequest( $action, $url ) );	
 	}
 	
 	public function getInvestmentPositions( $customerId, $accountId ) {
@@ -126,7 +126,7 @@ class IntuitInterface {
 		$url = 'v1/accounts/' . $accountId . '/positions';
 		
 		$this->initializeSession( $customerId );				
-		return( $this->sendRequest( $action, $url ) );
+		return( $this->sendJSONRequest( $action, $url ) );
 	}
 	
 	public function getLoginAccounts( $customerId, $loginId ) {
@@ -135,10 +135,10 @@ class IntuitInterface {
 		$url = 'v1/logins/' . $loginId . '/accounts';
 	
 		$this->initializeSession( $customerId );				
-		return( $this->sendRequest( $action, $url ) );
+		return( $this->sendJSONRequest( $action, $url ) );
 	}
-	
-	public function updateAcccountType( $customerId,
+
+	public function updateAccountType( $customerId,
 										$accountId,
 										$accountClassification,
 										$accountType ) {
@@ -148,7 +148,7 @@ class IntuitInterface {
 		$parameters[$accountClassification] = $accountType;
 
 		$this->initializeSession( $customerId );					
-		return( $this->sendRequest( $action, $url, $parameters ) );	
+		return( $this->sendJSONRequest( $action, $url, $parameters ) );	
 	}
 	
 	public function updateInstitutionLogin( $customerId,
@@ -160,7 +160,7 @@ class IntuitInterface {
 		$url = 'v1/logins/' . $loginId . '/?refresh=' . (($isRefreshReqd)?('true'):('false'));
 		
 		$this->initializeSession( $customerId );					
-		return( $this->sendRequest( $action, $url, array() ) );
+		return( $this->sendJSONRequest( $action, $url, array() ) );
 	}
 	
 	public function updateInstitutionLoginChallenge( $customerId,
@@ -179,8 +179,35 @@ class IntuitInterface {
 		$postData['challengeResponses']->response = $challengeResponses;
 
 		$this->initializeSession( $customerId );		
-		return( $this->sendRequest( $action, $url, array(), $postData, $headerAttribs ) );	
+		return( $this->sendJSONRequest( $action, $url, array(), $postData, $headerAttribs ) );	
 	}
+
+	public function listFiles() {
+	
+		$action = 'GET';
+		$url = 'v1/export/files/';
+
+		$this->initializeSession( BATCH_AUTH_ID  );					
+		return( $this->sendXMLRequest( $action, $url ) );
+	}
+
+	public function getFileData( $filename ) {
+	
+		$action = 'GET';
+		$url = 'v1/export/files/' . $filename;
+
+		$this->initializeSession( BATCH_AUTH_ID  );					
+		return( $this->sendOctetRequest( $action, $url ) );
+	}
+
+	public function deleteFile( $filename ) {
+	
+		$action = 'DELETE';
+		$url = 'v1/export/files/' . $filename;
+
+		$this->initializeSession( BATCH_AUTH_ID  );					
+		return( $this->sendJSONRequest( $action, $url ) );
+	}	
 
 	private function jsonDateConversion( $milliseconds ) {
 		
@@ -226,17 +253,43 @@ class IntuitInterface {
 
 		$header_size = curl_getinfo( $ch, CURLINFO_HEADER_SIZE );
 		$header = substr( $r, 0, $header_size );
-		$jsonResponse = json_decode( substr( $r, $header_size ) );
+		error_log( var_export( $header, true ) );
+		$body = substr( $r, $header_size );
+		error_log( var_export( $body, true ) );
 
-		$this->traverseResponse( $jsonResponse );
+		$contentType = curl_getinfo( $ch, CURLINFO_CONTENT_TYPE );
 
-		error_log( var_export( $jsonResponse, true ) );
+		$responseData = '';
+		switch( $contentType ) {
+			case 'application/json':
+				$responseData = json_decode( $body );
+				break;
+			case 'application/xml':
+				$xml = simplexml_load_string( $body );
+				$json = json_encode( $xml );
+				$responseData = json_decode( $json );
+				break;
+			case 'application/octet-stream':
+				$gzdata = gzdecode( $body );
+				/*
+				$xml = simplexml_load_string( $gzdata );
+				$json = json_encode( $xml );
+				$responseData = json_decode( $json );
+				*/
+				$responseData = $gzdata;
+				break;
+		}
+
+		error_log( var_export( $responseData, true ) );
+
+		$this->traverseResponse( $responseData );
+
 		
 		switch( curl_getinfo( $ch, CURLINFO_HTTP_CODE ) ) {
 			case 200:
 			case 201:
 				$response->result = 'success';
-				$response->data = $jsonResponse;
+				$response->data = $responseData;
 				break;
 			case 401:
 				if( strpos( $header, 'challengeNodeId' ) != false ) {
@@ -244,7 +297,7 @@ class IntuitInterface {
 					$response->result = 'challenge';
 					$jsonResponse->challengeNodeId = $headerAttribs['challengeNodeId'];
 					$jsonResponse->challengeSessionId = $headerAttribs['challengeSessionId'];
-					$response->data = $jsonResponse;
+					$response->data = $responseData;
 					break;
 				}
 			case 400:
@@ -255,8 +308,8 @@ class IntuitInterface {
 			case 503:
 			default:
 				$response->result = 'error';
-				if( isset( $jsonResponse->errorInfo ) )
-					$response->error = $jsonResponse->errorInfo;
+				if( isset( $responseData->errorInfo ) )
+					$response->error = $responseData->errorInfo;
 				else
 					$response->error = $r;
 		}
@@ -287,17 +340,74 @@ class IntuitInterface {
 		);
 		
 	}
-	
-	private function sendRequest( $action, $requestURL, 
-									$parameters = array(), 
-									$postData = array(),
-									$headerAttribs = array() ) {
+
+
+	private function sendOctetRequest( 
+																$action, 
+																$requestURL, 
+																$parameters = array(), 
+																$postData = array(),
+																$headerAttribs = array() ) {
+
+
+		$headerAttribs = array_merge( 
+								array (
+										'Accept-Encoding: gzip,deflate',
+									),
+								$headerAttribs
+						);
+
+		return $this->sendRequest( $action, $requestURL, $parameters, $postData, $headerAttribs );
+	}
+
+	private function sendXMLRequest( 
+																$action, 
+																$requestURL, 
+																$parameters = array(), 
+																$postData = array(),
+																$headerAttribs = array() ) {
+
+
+		$headerAttribs = array_merge( 
+								array (
+										'Accept: application/xml',
+										'Accept-Encoding: gzip,deflate',
+									),
+								$headerAttribs
+						);
+
+		return $this->sendRequest( $action, $requestURL, $parameters, $postData, $headerAttribs );
+	}
+
+	private function sendJSONRequest( 
+																$action, 
+																$requestURL, 
+																$parameters = array(), 
+																$postData = array(),
+																$headerAttribs = array() ) {
+
+		$headerAttribs = array_merge( 
+						array (
+								'Accept: application/json',
+							),
+						$headerAttribs
+				);
+
+		return $this->sendRequest( $action, $requestURL, $parameters, $postData, $headerAttribs );
+
+	}
+
+	private function sendRequest( 
+																$action, 
+																$requestURL, 
+																$parameters = array(), 
+																$postData = array(),
+																$headerAttribs = array() ) {
 
 		$auth = $this->authorizeRequest( $action, $requestURL, $parameters );
 
 		$headerAttribs = array_merge( 
 								array (
-										'Accept: application/json',
 										'Host: '. FINANCIAL_FEED_HOST
 									),
 								$headerAttribs

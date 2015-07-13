@@ -6,6 +6,8 @@ define('SIMPLEOAUTH_PATH', dirname( __FILE__ ) .  '/../IntuitInterface');
 define('OAUTH_CONSUMER_KEY', 'qyprdgNUv7w8gCw5UW4wG7RVTF2DBi' );
 define('OAUTH_SHARED_SECRET', 'jbCyB8jYjQqC1q00hsGyKzzi60CiZ74dWHoxaAj7' );
 
+define('BATCH_AUTH_ID', 'ant57eD3WN5vpqNnKLSFyd24rAQSca');
+
 define('SAML_IDENTITY_PROVIDER_ID', 'privpassagg.185394.cc.dev-intuit.ipp.prod' );
 define('SAML_X509_CERT_PATH',        dirname( __FILE__ ) . '/www.john2enterprises.com.crt');
 define('SAML_X509_PRIVATE_KEY_PATH', dirname( __FILE__ ) . '/www.john2enterprises.com.key');

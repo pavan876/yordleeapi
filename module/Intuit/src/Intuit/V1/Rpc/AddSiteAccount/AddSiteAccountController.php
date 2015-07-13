@@ -47,7 +47,7 @@ class AddSiteAccountController extends AbstractActionController
                             $otherAccount->accountNickname = $acct->accountNickname;
                             $otherAccount->description = $acct->description;
 
-                            $results->otherAccounts[] = $otherAccount;
+                            $result->otherAccounts[] = $otherAccount;
                         }
 
 			            return $response->setContent( json_encode( $result ) );

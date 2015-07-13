@@ -2,6 +2,11 @@
 namespace Intuit\V1\Rpc\UpdateBankAccountType;
 
 use Zend\Mvc\Controller\AbstractActionController;
+use ZF\ApiProblem\ApiProblem;
+use Intuit\V1\Model\IntuitInterface;
+use Intuit\V1\Model\Bank;
+use Intuit\V1\Model\CustomerAccount;
+use Intuit\V1\Model\CustomerTransaction;
 
 class UpdateBankAccountTypeController extends AbstractActionController
 {
